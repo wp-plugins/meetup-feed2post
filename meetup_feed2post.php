@@ -35,7 +35,7 @@ add_action('admin_notices', 'activation_notice');
 
 // Upon activation, schedule RSS fetching, create new category for posts, and add a DB field to store our url
 function rss_insert_activation() {
-	wp_schedule_event(time(), 'hourly', 'daily_feed_event');
+	wp_schedule_event(time(), 'daily', 'daily_feed_event');
     wp_create_category("meetup");	
 	add_option('rss2post_feedurl','','','');
 }
