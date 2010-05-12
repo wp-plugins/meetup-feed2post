@@ -61,8 +61,8 @@ function meetup_admin() {
     //Updates the FEED URL Option
     if( isset($_POST["update"]) ){
         remove_action('admin_notices', 'activation_notice');
-        $feedurl = esc_url_raw($_POST["feedurl"]);
-        $meetup_author = $_POST["user"];
+        $feedurl        = esc_url_raw($_POST["feedurl"]);
+        $meetup_author  = $_POST["user"];
         update_option(MEETUP_FEEDURL_OPT, $feedurl );
         update_option(MEETUP_AUTHOR_OPT, $meetup_author);
         meetup_insert_function(); //running our insert/update method on settings update
@@ -91,9 +91,9 @@ function meetup_admin() {
 //Add or Update Posts
 function meetup_insert_function() {
     global $wpdb;
-    $feedurl = get_option(MEETUP_FEEDURL_OPT);
+    $feedurl        = get_option(MEETUP_FEEDURL_OPT);
     $current_author = get_option(MEETUP_AUTHOR_OPT);
-    $category_id = get_cat_id('meetup');
+    $category_id    = get_cat_id('meetup');
     //loop through the current posts and store our custom meta GUID's into an array for dupe checking
     $guid_r = array();
     $existing_metas = $wpdb->get_results("SELECT * FROM $wpdb->postmeta WHERE meta_key = 'meetup_guid'");
@@ -107,21 +107,21 @@ function meetup_insert_function() {
     foreach($meetup_rss->xpath('channel/item') as $item){
         //If we find a GUID match in our array, update the post
         if(in_array($item->guid, $guid_r, false)){
-            $rss_guid = $item->guid;
-            $rss_description = $item->description;
-            $update_post_id = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_value='$rss_guid'"));
-            $updated_info = array();
-            $updated_info['ID'] = $update_post_id;
-            $updated_info['post_author'] = $current_author;
-            $updated_info['post_content'] = $rss_description;
+            $rss_guid           = $item->guid;
+            $rss_description    = $item->description;
+            $update_post_id     = $wpdb->get_var($wpdb->prepare("SELECT post_id FROM $wpdb->postmeta WHERE meta_value='$rss_guid'"));
+            $updated_info       = array();
+            $updated_info['ID']             = $update_post_id;
+            $updated_info['post_author']    = $current_author;
+            $updated_info['post_content']   = $rss_description;
             wp_update_post($updated_info);
         } else{ //make the new post
             $post = array();
-            $post['post_title'] = $item->title;
-            $post['post_content'] = $item->description;
-            $post['post_status'] = 'publish';
-            $post['post_author'] = $current_author;
-            $post['post_category'] = array($category_id);
+            $post['post_title']     = $item->title;
+            $post['post_content']   = $item->description;
+            $post['post_status']    = 'publish';
+            $post['post_author']    = $current_author;
+            $post['post_category']  = array($category_id);
             $postID = wp_insert_post($post);
             //adding a unique custom meta field to check against duplicates
             add_post_meta($postID, 'meetup_guid', $item->guid);
